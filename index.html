@@ -115,6 +115,7 @@
             color: var(--primary-color);
             border-bottom: 2px solid var(--primary-color);
             padding-bottom: 0.5rem;
+			text-align: center;
         }
         .results-grid {
             display: grid;
@@ -131,6 +132,7 @@
         }
         .casualties {
             margin-top: 1rem;
+			text-align: center;	
         }
         .casualties h4 {
             color: var(--secondary-color);
@@ -280,6 +282,8 @@
             const defenderLossPercentage = attackerOffense / totalCombatValue;
             const attackerLossPercentage = totalDefense / totalCombatValue;
 
+			const winner = attackerLossPercentage < defenderLossPercentage ? "Attacker" : "Defender";
+
             const results = document.getElementById('results');
             results.innerHTML = `
                 <h3>Battle Results</h3>
@@ -296,9 +300,12 @@
                     <div class="result-item">
                         <p><strong>Defender Loss Percentage:<br></strong> ${(defenderLossPercentage * 100).toFixed(2)}%</p>
                     </div>
+                    <div class="result-item">
+                        <p><strong>Winner:<br></strong> ${winner}</p>
+                    </div>
                 </div>
                 <div class="casualties">
-                    <h4>Casualties:</h4>
+                    <h3>Casualties:</h3>
                     ${calculateCasualties(attackerUnits, attackerLossPercentage, 'Attacker')}
                     ${calculateCasualties(defenderUnits, defenderLossPercentage, 'Defender')}
                 </div>
