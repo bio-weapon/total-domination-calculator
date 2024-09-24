@@ -1,0 +1,415 @@
+<!-- WEBSITE CREATED BY BIOWEAPON CLAN FOR TD. 2024-09-24 -->
+
+<!-- WILL BE UPDATED IN THE FUTURE. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="Total Domination: Nuclear Strategy Battle Calculator">
+	<meta name="keywords" content="Plarium, Total Domination, Nuclear Strategy, Total Domination: Nuclear Strategy, Calculator, Battle Calculator, Battle, Fight Calculator">
+	<meta name="author" content="BIOWEAPON">
+    <title>Total Domination - Battle Calculator</title>
+    <style>
+        :root {
+            --primary-color: #1abc9c;
+            --secondary-color: #e67e22;
+            --background-color: #2c3e50;
+            --text-color: #ecf0f1;
+            --header-color: #34495e;
+            --input-border-color: #7f8c8d;
+            --result-bg-color: #34495e;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        .header {
+            background-color: var(--header-color);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .battle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .battle-column {
+            background-color: #34495e;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+        }
+        h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+        .unit-category {
+            margin-bottom: 1.5rem;
+        }
+        h3 {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        .unit-input {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        label {
+            flex: 1;
+            margin-right: 1rem;
+            color: var(--text-color);
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 0.3rem;
+            border: 1px solid var(--input-border-color);
+            border-radius: 4px;
+            background-color: #2c3e50;
+            color: var(--text-color);
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-top: 2rem;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #16a085;
+        }
+        #results {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: var(--result-bg-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        #results h3 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .result-item {
+            background-color: #34495e;
+            padding: 1rem;
+            border-radius: 5px;
+        }
+        .result-item p {
+            color: var(--text-color);
+        }
+        .casualties {
+            margin-top: 1rem;
+        }
+        .casualties h4 {
+            color: var(--secondary-color);
+        }
+        .casualties p {
+            color: var(--text-color);
+        }
+        .bonus-input {
+            width: 80px !important;
+            margin-left: 5px;
+        }
+        #languageSelector {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <select id="languageSelector" onchange="changeLanguage()">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+            <option value="uk">Українська</option>
+            <option value="es">Español</option>
+            <option value="de">Deutsch</option>
+        </select>
+        <h1 id="headerTitle">Total Domination - Battle Calculator 1.0</h1>
+        <p id="headerDescription" class="description">Calculate battle outcomes for Total Domination.<br>Input unit amount and bonuses for attackers and defenders.</p>
+    </div>
+    <div class="container">
+        <div class="battle-grid">
+            <div class="battle-column">
+                <h2>Attacker Units</h2>
+                <div id="attackerUnits"></div>
+            </div>
+            <div class="battle-column">
+                <h2>Defender Units</h2>
+                <div id="defenderUnits"></div>
+            </div>
+        </div>
+        <button onclick="calculateBattle()">Calculate Battle Outcome</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const units = {
+            air: [
+                { name: "Interceptor", offense: 120, defense: { infantry: 400, armored: 500, artillery: 600, air: 850 } },
+                { name: "Imperial Interceptor", offense: 150, defense: { infantry: 550, armored: 550, artillery: 700, air: 700 } },
+                { name: "Fighter", offense: 1440, defense: { infantry: 144, armored: 43, artillery: 43, air: 144 } },
+                { name: "Battlecruiser", offense: 1680, defense: { infantry: 144, armored: 43, artillery: 43, air: 144 } },
+                { name: "Imperial Battlecruiser", offense: 1750, defense: { infantry: 150, armored: 45, artillery: 45, air: 150 } },
+                { name: '"Excalibur" Platform', offense: 120, defense: { infantry: 600, armored: 750, artillery: 900, air: 1275 } },
+                { name: "Exterminator", offense: 900, defense: { infantry: 100, armored: 100, artillery: 100, air: 100 } }
+            ],
+            artillery: [
+                { name: "Gauss Gun", offense: 80, defense: { infantry: 300, armored: 300, artillery: 500, air: 500 } },
+                { name: "Imperial Gauss Gun", offense: 100, defense: { infantry: 400, armored: 400, artillery: 480, air: 480 } },
+                { name: "Plasma Cannon", offense: 720, defense: { infantry: 80, armored: 100, artillery: 100, air: 80 } },
+                { name: "Quantum Cannon", offense: 100, defense: { infantry: 380, armored: 380, artillery: 500, air: 400 } },
+                { name: "Disintegrator", offense: 900, defense: { infantry: 80, armored: 80, artillery: 100, air: 100 } },
+                { name: "Imperial Disintegrator", offense: 950, defense: { infantry: 90, armored: 80, artillery: 80, air: 100 } },
+                { name: "Sandworm", offense: 1140, defense: { infantry: 80, armored: 80, artillery: 100, air: 100 } }
+            ],
+            armored: [
+                { name: "Mongoose ASV", offense: 40, defense: { infantry: 130, armored: 170, artillery: 170, air: 130 } },
+                { name: "Light Tank", offense: 240, defense: { infantry: 30, armored: 80, artillery: 30, air: 30 } },
+                { name: "Imperial Light Tank", offense: 250, defense: { infantry: 40, armored: 50, artillery: 40, air: 40 } },
+                { name: "Viper APC", offense: 50, defense: { infantry: 170, armored: 170, artillery: 130, air: 130 } },
+                { name: "Imperial Viper APC", offense: 120, defense: { infantry: 180, armored: 140, artillery: 160, air: 160 } },
+                { name: "Siege Tank", offense: 360, defense: { infantry: 80, armored: 30, artillery: 30, air: 30 } },
+                { name: "Thunderbolt", offense: 360, defense: { infantry: 30, armored: 40, artillery: 40, air: 40 } },
+                { name: '"Aegis" BMD-1', offense: 50, defense: { infantry: 150, armored: 150, artillery: 150, air: 150 } },
+                { name: '"Arachne" Assault Tank', offense: 360, defense: { infantry: 80, armored: 80, artillery: 100, air: 100 } }
+            ],
+            infantry: [
+                { name: "Trooper", offense: 40, defense: { infantry: 12, armored: 5, artillery: 5, air: 5 } },
+                { name: "Cyberdog", offense: 10, defense: { infantry: 20, armored: 20, artillery: 18, air: 18 } },
+                { name: "Gladiator", offense: 15, defense: { infantry: 30, armored: 26, artillery: 16, air: 16 } },
+                { name: "Valkyrie", offense: 60, defense: { infantry: 12, armored: 12, artillery: 8, air: 8 } },
+                { name: "S.C.A.R. Sniper", offense: 15, defense: { infantry: 60, armored: 20, artillery: 20, air: 20 } },
+                { name: "S.C.A.R. Heavy Gunner", offense: 15, defense: { infantry: 20, armored: 60, artillery: 20, air: 20 } },
+                { name: "S.C.A.R. Anti-Artillery", offense: 15, defense: { infantry: 20, armored: 20, artillery: 60, air: 20 } },
+                { name: 'S.C.A.R. "Asp" Fireteam', offense: 15, defense: { infantry: 20, armored: 20, artillery: 20, air: 60 } },
+                { name: "Nemesis", offense: 75, defense: { infantry: 14, armored: 14, artillery: 14, air: 14 } },
+                { name: "Combat Chassis", offense: 15, defense: { infantry: 30, armored: 30, artillery: 30, air: 30 } },
+                { name: '"Reaper" Assault Hybrid', offense: 75, defense: { infantry: 14, armored: 14, artillery: 14, air: 14 } },
+                { name: '"Cutie" Android', offense: 15, defense: { infantry: 30, armored: 30, artillery: 30, air: 30 } }
+            ]
+        };
+
+        function createUnitInputs(containerId, side) {
+            const container = document.getElementById(containerId);
+            for (const category in units) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'unit-category';
+                categoryDiv.innerHTML = `<h3>${category.charAt(0).toUpperCase() + category.slice(1)}</h3>`;
+                units[category].forEach(unit => {
+                    const inputDiv = document.createElement('div');
+                    inputDiv.className = 'unit-input';
+                    const label = document.createElement('label');
+                    label.textContent = unit.name;
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '0';
+                    input.value = '0';
+                    input.dataset.category = category;
+                    input.dataset.name = unit.name;
+                    const bonusInput = document.createElement('input');
+                    bonusInput.type = 'number';
+                    bonusInput.min = '0';
+                    bonusInput.className = 'bonus-input';
+                    bonusInput.placeholder = 'Bonus %';
+                    inputDiv.appendChild(label);
+                    inputDiv.appendChild(input);
+                    inputDiv.appendChild(bonusInput);
+                    categoryDiv.appendChild(inputDiv);
+                });
+                container.appendChild(categoryDiv);
+            }
+        }
+
+        createUnitInputs('attackerUnits', 'attacker');
+        createUnitInputs('defenderUnits', 'defender');
+
+        function calculateBattle() {
+            const attackerUnits = getUnits('attackerUnits');
+            const defenderUnits = getUnits('defenderUnits');
+
+            const attackerOffense = calculateTotalOffense(attackerUnits);
+            const defenderDefense = calculateTotalDefense(defenderUnits);
+            const attackerComposition = calculateComposition(attackerUnits);
+
+            let totalDefense = 0;
+            for (const type in defenderDefense) {
+                totalDefense += defenderDefense[type] * (attackerComposition[type] || 0);
+            }
+
+            const totalCombatValue = attackerOffense + totalDefense;
+            const defenderLossPercentage = attackerOffense / totalCombatValue;
+            const attackerLossPercentage = totalDefense / totalCombatValue;
+
+            const results = document.getElementById('results');
+            results.innerHTML = `
+                <h3>Battle Results</h3>
+                <div class="results-grid">
+                    <div class="result-item">
+                        <p><strong>Attacker Total Offense:<br></strong> ${attackerOffense.toFixed(2)}</p>
+                    </div>
+                    <div class="result-item">
+                        <p><strong>Defender Total Defense:<br></strong> ${totalDefense.toFixed(2)}</p>
+                    </div>
+                    <div class="result-item">
+                        <p><strong>Attacker Loss Percentage:<br></strong> ${(attackerLossPercentage * 100).toFixed(2)}%</p>
+                    </div>
+                    <div class="result-item">
+                        <p><strong>Defender Loss Percentage:<br></strong> ${(defenderLossPercentage * 100).toFixed(2)}%</p>
+                    </div>
+                </div>
+                <div class="casualties">
+                    <h4>Casualties:</h4>
+                    ${calculateCasualties(attackerUnits, attackerLossPercentage, 'Attacker')}
+                    ${calculateCasualties(defenderUnits, defenderLossPercentage, 'Defender')}
+                </div>
+            `;
+        }
+
+        function getUnits(containerId) {
+            const container = document.getElementById(containerId);
+            const inputs = container.querySelectorAll('.unit-input');
+            const unitCounts = {};
+            inputs.forEach(inputDiv => {
+                const countInput = inputDiv.querySelector('input[type="number"]:not(.bonus-input)');
+                const bonusInput = inputDiv.querySelector('.bonus-input');
+                const category = countInput.dataset.category;
+                const name = countInput.dataset.name;
+                const count = parseInt(countInput.value) || 0;
+                const bonus = parseInt(bonusInput.value) || 0;
+                if (count > 0) {
+                    if (!unitCounts[category]) unitCounts[category] = {};
+                    unitCounts[category][name] = { count, bonus };
+                }
+            });
+            return unitCounts;
+        }
+
+        function calculateTotalOffense(unitCounts) {
+            let totalOffense = 0;
+            for (const category in unitCounts) {
+                for (const unitName in unitCounts[category]) {
+                    const unit = units[category].find(u => u.name === unitName);
+                    const { count, bonus } = unitCounts[category][unitName];
+                    const bonusMultiplier = 1 + (bonus / 100);
+                    totalOffense += unit.offense * count * bonusMultiplier;
+                }
+            }
+            return totalOffense;
+        }
+
+        function calculateTotalDefense(unitCounts) {
+            const totalDefense = { infantry: 0, armored: 0, artillery: 0, air: 0 };
+            for (const category in unitCounts) {
+                for (const unitName in unitCounts[category]) {
+                    const unit = units[category].find(u => u.name === unitName);
+                    const { count, bonus } = unitCounts[category][unitName];
+                    const bonusMultiplier = 1 + (bonus / 100);
+                    for (const defenseType in totalDefense) {
+                        totalDefense[defenseType] += unit.defense[defenseType] * count * bonusMultiplier;
+                    }
+                }
+            }
+            return totalDefense;
+        }
+
+        function calculateComposition(unitCounts) {
+            const composition = { infantry: 0, armored: 0, artillery: 0, air: 0 };
+            let total = 0;
+            for (const category in unitCounts) {
+                for (const unitName in unitCounts[category]) {
+                    const { count } = unitCounts[category][unitName];
+                    composition[category] += count;
+                    total += count;
+                }
+            }
+            for (const category in composition) {
+                composition[category] = composition[category] / total;
+            }
+            return composition;
+        }
+
+        function calculateCasualties(unitCounts, lossPercentage, side) {
+            let casualties = '';
+            for (const category in unitCounts) {
+                casualties += `<h5>${category.charAt(0).toUpperCase() + category.slice(1)}</h5>`;
+                for (const unitName in unitCounts[category]) {
+                    const { count, bonus } = unitCounts[category][unitName];
+                    const lost = Math.round(count * lossPercentage);
+                    casualties += `<p>${side} ― ${unitName}: ${lost} lost out of ${count}</p>`;
+                }
+            }
+            return casualties;
+        }
+
+        const translations = {
+            en: {
+                title: "Total Domination - Battle Calculator 1.0",
+                description: "Calculate battle outcomes for Total Domination.<br>Input unit amount and bonuses for attackers and defenders."
+            },
+            ru: {
+                title: "Тотальное Превосходство - Калькулятор Сражений 1.0",
+                description: "Рассчитайте исходы битв для Тотального Превосходства.<br>Введите количество юнитов и бонусы для атакующих и защищающихся."
+            },
+            uk: {
+                title: "Тотальне Домінування - Калькулятор Битв 1.0",
+                description: "Розрахуйте результати битв для Тотального Домінування.<br>Введіть кількість юнітів та бонуси для атакуючих та захисників."
+            },
+            es: {
+                title: "Dominación Total - Calculadora de Batallas 1.0",
+                description: "Calcula los resultados de las batallas para Dominación Total.<br>Ingresa la cantidad de unidades y bonificaciones para atacantes y defensores."
+            },
+            de: {
+                title: "Totale Dominanz - Schlachtrechner 1.0",
+                description: "Berechnen Sie Schlachtergebnisse für Totale Dominanz.<br>Geben Sie Einheitenzahl und Boni für Angreifer und Verteidiger ein."
+            }
+        };
+
+        function changeLanguage() {
+            const language = document.getElementById('languageSelector').value;
+            const translation = translations[language];
+            document.getElementById('headerTitle').innerHTML = translation.title;
+            document.getElementById('headerDescription').innerHTML = translation.description;
+        }
+    </script>
+</body>
+</html>
