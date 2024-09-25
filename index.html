@@ -7,10 +7,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="Total Domination: Nuclear Strategy Battle Calculator">
-	<meta name="keywords" content="Plarium, Total Domination, Nuclear Strategy, Total Domination: Nuclear Strategy, Calculator, Battle Calculator, Battle, Fight Calculator">
-	<meta name="author" content="BIOWEAPON">
+    <meta name="description" content="Total Domination: Nuclear Strategy Battle Calculator">
+    <meta name="keywords" content="Plarium, Total Domination, Nuclear Strategy, Total Domination: Nuclear Strategy, Calculator, Battle Calculator, Battle, Fight Calculator">
+    <meta name="author" content="BIOWEAPON">
     <title>Total Domination - Battle Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #1abc9c;
@@ -20,9 +21,12 @@
             --header-color: #34495e;
             --input-border-color: #7f8c8d;
             --result-bg-color: #34495e;
+            --offensive-color: #f1c40f;
+            --defensive-color: #ADD8E6;
+            --misc-color: #D3D3D3;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Roboto', sans-serif;
             line-height: 1.6;
             margin: 0;
             padding: 0;
@@ -40,6 +44,10 @@
         h1 {
             margin: 0;
             font-size: 2.5rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
         .container {
             max-width: 1200px;
@@ -62,6 +70,9 @@
             margin-top: 0;
             border-bottom: 2px solid var(--primary-color);
             padding-bottom: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
         }
         .unit-category {
             margin-bottom: 1.5rem;
@@ -69,6 +80,9 @@
         h3 {
             color: var(--secondary-color);
             margin-bottom: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 400;
+            font-size: 1.4rem;
         }
         .unit-input {
             display: flex;
@@ -79,6 +93,7 @@
             flex: 1;
             margin-right: 1rem;
             color: var(--text-color);
+            font-weight: 300;
         }
         input[type="number"] {
             width: 80px;
@@ -87,6 +102,7 @@
             border-radius: 4px;
             background-color: #2c3e50;
             color: var(--text-color);
+            font-family: 'Roboto', sans-serif;
         }
         button {
             display: block;
@@ -100,6 +116,10 @@
             font-size: 1.1rem;
             margin-top: 2rem;
             transition: background-color 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         button:hover {
             background-color: #16a085;
@@ -115,7 +135,10 @@
             color: var(--primary-color);
             border-bottom: 2px solid var(--primary-color);
             padding-bottom: 0.5rem;
-			text-align: center;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.6rem;
         }
         .results-grid {
             display: grid;
@@ -129,20 +152,61 @@
         }
         .result-item p {
             color: var(--text-color);
+            font-weight: 300;
         }
         .casualties {
             margin-top: 1rem;
-			text-align: center;	
+            text-align: center; 
         }
         .casualties h4 {
             color: var(--secondary-color);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 400;
+            font-size: 1.3rem;
         }
         .casualties p {
             color: var(--text-color);
+            font-weight: 300;
         }
         .bonus-input {
             width: 80px !important;
             margin-left: 5px;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .unit-input.offensive label {
+            color: var(--offensive-color);
+        }
+        .unit-input.defensive label {
+            color: var(--defensive-color);
+        }
+        .unit-input.misc label {
+            color: var(--misc-color);
         }
         #languageSelector {
             position: absolute;
@@ -154,6 +218,8 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-family: 'Roboto', sans-serif;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -187,47 +253,51 @@
     <script>
         const units = {
             air: [
-                { name: "Interceptor", offense: 120, defense: { infantry: 400, armored: 500, artillery: 600, air: 850 } },
-                { name: "Imperial Interceptor", offense: 150, defense: { infantry: 550, armored: 550, artillery: 700, air: 700 } },
-                { name: "Fighter", offense: 1440, defense: { infantry: 144, armored: 43, artillery: 43, air: 144 } },
-                { name: "Battlecruiser", offense: 1680, defense: { infantry: 144, armored: 43, artillery: 43, air: 144 } },
-                { name: "Imperial Battlecruiser", offense: 1750, defense: { infantry: 150, armored: 45, artillery: 45, air: 150 } },
-                { name: '"Excalibur" Platform', offense: 120, defense: { infantry: 600, armored: 750, artillery: 900, air: 1275 } },
-                { name: "Exterminator", offense: 900, defense: { infantry: 100, armored: 100, artillery: 100, air: 100 } }
+                { name: "Interceptor", offense: 120, defense: { infantry: 400, armored: 500, artillery: 600, air: 850 }, type: "defensive" },
+                { name: "Imperial Interceptor", offense: 150, defense: { infantry: 550, armored: 550, artillery: 700, air: 700 }, type: "defensive" },
+                { name: '"Excalibur" Platform', offense: 120, defense: { infantry: 600, armored: 750, artillery: 900, air: 1275 }, type: "defensive" },
+                { name: "Fighter", offense: 1440, defense: { infantry: 144, armored: 43, artillery: 43, air: 144 }, type: "offensive" },
+                { name: "Battlecruiser", offense: 1680, defense: { infantry: 144, armored: 43, artillery: 43, air: 144 }, type: "offensive" },
+                { name: "Imperial Battlecruiser", offense: 1750, defense: { infantry: 150, armored: 45, artillery: 45, air: 150 }, type: "offensive" },
+                { name: "Exterminator", offense: 900, defense: { infantry: 100, armored: 100, artillery: 100, air: 100 }, type: "offensive" },
+                { name: "Destructor", offense: 80, defense: { infantry: 80, armored: 80, artillery: 80, air: 240 }, type: "misc" }
             ],
             artillery: [
-                { name: "Gauss Gun", offense: 80, defense: { infantry: 300, armored: 300, artillery: 500, air: 500 } },
-                { name: "Imperial Gauss Gun", offense: 100, defense: { infantry: 400, armored: 400, artillery: 480, air: 480 } },
-                { name: "Plasma Cannon", offense: 720, defense: { infantry: 80, armored: 100, artillery: 100, air: 80 } },
-                { name: "Quantum Cannon", offense: 100, defense: { infantry: 380, armored: 380, artillery: 500, air: 400 } },
-                { name: "Disintegrator", offense: 900, defense: { infantry: 80, armored: 80, artillery: 100, air: 100 } },
-                { name: "Imperial Disintegrator", offense: 950, defense: { infantry: 90, armored: 80, artillery: 80, air: 100 } },
-                { name: "Sandworm", offense: 1140, defense: { infantry: 80, armored: 80, artillery: 100, air: 100 } }
+                { name: "Gauss Gun", offense: 80, defense: { infantry: 300, armored: 300, artillery: 500, air: 500 }, type: "defensive" },
+                { name: "Imperial Gauss Gun", offense: 100, defense: { infantry: 400, armored: 400, artillery: 480, air: 480 }, type: "defensive" },
+                { name: "Quantum Cannon", offense: 100, defense: { infantry: 380, armored: 380, artillery: 500, air: 400 }, type: "defensive" },
+                { name: "Plasma Cannon", offense: 720, defense: { infantry: 80, armored: 100, artillery: 100, air: 80 }, type: "offensive" },
+                { name: "Disintegrator", offense: 900, defense: { infantry: 80, armored: 80, artillery: 100, air: 100 }, type: "offensive" },
+                { name: "Imperial Disintegrator", offense: 950, defense: { infantry: 90, armored: 80, artillery: 80, air: 100 }, type: "offensive" },
+                { name: "Sandworm", offense: 1140, defense: { infantry: 80, armored: 80, artillery: 100, air: 100 }, type: "offensive" },
+                { name: "Raptor", offense: 60, defense: { infantry: 60, armored: 60, artillery: 180, air: 60 }, type: "misc" }
             ],
             armored: [
-                { name: "Mongoose ASV", offense: 40, defense: { infantry: 130, armored: 170, artillery: 170, air: 130 } },
-                { name: "Light Tank", offense: 240, defense: { infantry: 30, armored: 80, artillery: 30, air: 30 } },
-                { name: "Imperial Light Tank", offense: 250, defense: { infantry: 40, armored: 50, artillery: 40, air: 40 } },
-                { name: "Viper APC", offense: 50, defense: { infantry: 170, armored: 170, artillery: 130, air: 130 } },
-                { name: "Imperial Viper APC", offense: 120, defense: { infantry: 180, armored: 140, artillery: 160, air: 160 } },
-                { name: "Siege Tank", offense: 360, defense: { infantry: 80, armored: 30, artillery: 30, air: 30 } },
-                { name: "Thunderbolt", offense: 360, defense: { infantry: 30, armored: 40, artillery: 40, air: 40 } },
-                { name: '"Aegis" BMD-1', offense: 50, defense: { infantry: 150, armored: 150, artillery: 150, air: 150 } },
-                { name: '"Arachne" Assault Tank', offense: 360, defense: { infantry: 80, armored: 80, artillery: 100, air: 100 } }
+                { name: "Mongoose ASV", offense: 40, defense: { infantry: 130, armored: 170, artillery: 170, air: 130 }, type: "defensive" },
+                { name: "Viper APC", offense: 50, defense: { infantry: 170, armored: 170, artillery: 130, air: 130 }, type: "defensive" },
+                { name: "Imperial Viper APC", offense: 120, defense: { infantry: 180, armored: 140, artillery: 160, air: 160 }, type: "defensive" },
+                { name: '"Aegis" BMD-1', offense: 50, defense: { infantry: 150, armored: 150, artillery: 150, air: 150 }, type: "defensive" },
+                { name: "Light Tank", offense: 240, defense: { infantry: 30, armored: 80, artillery: 30, air: 30 }, type: "offensive" },
+                { name: "Imperial Light Tank", offense: 250, defense: { infantry: 40, armored: 50, artillery: 40, air: 40 }, type: "offensive" },
+                { name: "Siege Tank", offense: 360, defense: { infantry: 80, armored: 30, artillery: 30, air: 30 }, type: "offensive" },
+                { name: "Thunderbolt", offense: 360, defense: { infantry: 30, armored: 40, artillery: 40, air: 40 }, type: "offensive" },
+                { name: '"Arachne" Assault Tank', offense: 360, defense: { infantry: 80, armored: 80, artillery: 100, air: 100 }, type: "offensive" },
+                { name: "Predator", offense: 40, defense: { infantry: 40, armored: 120, artillery: 40, air: 40 }, type: "misc" }
             ],
             infantry: [
-                { name: "Trooper", offense: 40, defense: { infantry: 12, armored: 5, artillery: 5, air: 5 } },
-                { name: "Cyberdog", offense: 10, defense: { infantry: 20, armored: 20, artillery: 18, air: 18 } },
-                { name: "Gladiator", offense: 15, defense: { infantry: 30, armored: 26, artillery: 16, air: 16 } },
-                { name: "Valkyrie", offense: 60, defense: { infantry: 12, armored: 12, artillery: 8, air: 8 } },
-                { name: "S.C.A.R. Sniper", offense: 15, defense: { infantry: 60, armored: 20, artillery: 20, air: 20 } },
-                { name: "S.C.A.R. Heavy Gunner", offense: 15, defense: { infantry: 20, armored: 60, artillery: 20, air: 20 } },
-                { name: "S.C.A.R. Anti-Artillery", offense: 15, defense: { infantry: 20, armored: 20, artillery: 60, air: 20 } },
-                { name: 'S.C.A.R. "Asp" Fireteam', offense: 15, defense: { infantry: 20, armored: 20, artillery: 20, air: 60 } },
-                { name: "Nemesis", offense: 75, defense: { infantry: 14, armored: 14, artillery: 14, air: 14 } },
-                { name: "Combat Chassis", offense: 15, defense: { infantry: 30, armored: 30, artillery: 30, air: 30 } },
-                { name: '"Reaper" Assault Hybrid', offense: 75, defense: { infantry: 14, armored: 14, artillery: 14, air: 14 } },
-                { name: '"Cutie" Android', offense: 15, defense: { infantry: 30, armored: 30, artillery: 30, air: 30 } }
+                { name: "Cyberdog", offense: 10, defense: { infantry: 20, armored: 20, artillery: 18, air: 18 }, type: "defensive" },
+                { name: "Gladiator", offense: 15, defense: { infantry: 30, armored: 26, artillery: 16, air: 16 }, type: "defensive" },
+                { name: "S.C.A.R. Sniper", offense: 15, defense: { infantry: 60, armored: 20, artillery: 20, air: 20 }, type: "defensive" },
+                { name: "S.C.A.R. Heavy Gunner", offense: 15, defense: { infantry: 20, armored: 60, artillery: 20, air: 20 }, type: "defensive" },
+                { name: "S.C.A.R. Anti-Artillery", offense: 15, defense: { infantry: 20, armored: 20, artillery: 60, air: 20 }, type: "defensive" },
+                { name: 'S.C.A.R. "Asp" Fireteam', offense: 15, defense: { infantry: 20, armored: 20, artillery: 20, air: 60 }, type: "defensive" },
+                { name: "Combat Chassis", offense: 15, defense: { infantry: 30, armored: 30, artillery: 30, air: 30 }, type: "defensive" },
+                { name: '"Cutie" Android', offense: 15, defense: { infantry: 30, armored: 30, artillery: 30, air: 30 }, type: "defensive" },
+                { name: "Trooper", offense: 40, defense: { infantry: 12, armored: 5, artillery: 5, air: 5 }, type: "offensive" },
+                { name: "Valkyrie", offense: 60, defense: { infantry: 12, armored: 12, artillery: 8, air: 8 }, type: "offensive" },
+                { name: "Nemesis", offense: 75, defense: { infantry: 14, armored: 14, artillery: 14, air: 14 }, type: "offensive" },
+                { name: '"Reaper" Assault Hybrid', offense: 75, defense: { infantry: 14, armored: 14, artillery: 14, air: 14 }, type: "offensive" },
+                { name: "Chimera", offense: 20, defense: { infantry: 60, armored: 20, artillery: 20, air: 20 }, type: "misc" }
             ]
         };
 
@@ -239,9 +309,10 @@
                 categoryDiv.innerHTML = `<h3>${category.charAt(0).toUpperCase() + category.slice(1)}</h3>`;
                 units[category].forEach(unit => {
                     const inputDiv = document.createElement('div');
-                    inputDiv.className = 'unit-input';
+                    inputDiv.className = `unit-input ${unit.type}`;
                     const label = document.createElement('label');
-                    label.textContent = unit.name;
+                    label.className = 'tooltip';
+                    label.innerHTML = `${unit.name}<span class="tooltiptext">Offense: ${unit.offense}<br>Defense:<br>Infantry: ${unit.defense.infantry}<br>Armored: ${unit.defense.armored}<br>Artillery: ${unit.defense.artillery}<br>Air: ${unit.defense.air}</span>`;
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.min = '0';
