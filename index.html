@@ -1,6 +1,6 @@
-<!-- WEBSITE CREATED BY BIOWEAPON CLAN FOR TD. 2024-09-24 -->
+<!-- WEBSITE CREATED BY kittyweapon ON DISCORD FOR TD. 2024-09-24 -->
 
-<!-- WILL BE UPDATED IN THE FUTURE. -->
+<!-- WILL BE UPDATED IN THE FUTURE. LAST UPDATE: 2025-09-02 -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -24,6 +24,7 @@
             --offensive-color: #f1c40f;
             --defensive-color: #ADD8E6;
             --misc-color: #D3D3D3;
+            --emitter-color: #ff6b6b;
         }
         body {
             font-family: 'Roboto', sans-serif;
@@ -53,6 +54,36 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+        }
+        .emitter-mode {
+            background-color: var(--result-bg-color);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border: 2px solid var(--emitter-color);
+        }
+        .emitter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .emitter-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--emitter-color);
+        }
+        .emitter-checkbox label {
+            color: var(--emitter-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .emitter-description {
+            color: var(--text-color);
+            font-size: 0.9rem;
+            font-style: italic;
+            margin-left: 25px;
         }
         .battle-grid {
             display: grid;
@@ -221,6 +252,26 @@
             font-family: 'Roboto', sans-serif;
             font-size: 0.9rem;
         }
+        .emitter-active {
+            border-color: var(--emitter-color) !important;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+        }
+        .casualty-table {
+            background-color: #34495e;
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+        .casualty-category {
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .casualty-item {
+            margin-bottom: 0.3rem;
+            color: var(--text-color);
+        }
     </style>
 </head>
 <body>
@@ -232,10 +283,19 @@
             <option value="es">Español</option>
             <option value="de">Deutsch</option>
         </select>
-        <h1 id="headerTitle">Total Domination - Battle Calculator 1.0</h1>
+        <h1 id="headerTitle">Total Domination - Battle Calculator 1.1</h1>
         <p id="headerDescription" class="description">Calculate battle outcomes for Total Domination.<br>Input unit amount and bonuses for attackers and defenders.</p>
     </div>
     <div class="container">
+        <div class="emitter-mode" id="emitterMode">
+            <div class="emitter-checkbox">
+                <input type="checkbox" id="emitterModeCheckbox" onchange="toggleEmitterMode()">
+                <label for="emitterModeCheckbox">EMITTER MODE</label>
+            </div>
+            <div class="emitter-description">
+                Emitter battles use empirical data from actual battle logs with +25% defender bonus. This mode provides semi-accurate predictions based on real battle outcomes.
+            </div>
+        </div>
         <div class="battle-grid">
             <div class="battle-column">
                 <h2>Attacker Units</h2>
@@ -303,6 +363,100 @@
             ]
         };
 
+        const attackerEmpirical = [
+            [0.01999982051766484, 0.9973549734292911],
+            [0.02000008840113911, 0.99739],
+            [0.02222208577366333, 0.9969444361787598],
+            [0.024999144335921195, 0.9963927306970186],
+            [0.02857177143334168, 0.9956298003352702],
+            [0.033276149929042494, 0.9944567009661527],
+            [0.03993137991485099, 0.9928],
+            [0.04999791301444194, 0.98984],
+            [0.05002385067404079, 0.9885191301764108],
+            [0.0666677101594457, 0.9845075052043388],
+            [0.06668268233667474, 0.9828],
+            [0.08330694780504666, 0.976],
+            [0.09998409955063947, 0.969],
+            [0.10000162784873529, 0.972],
+            [0.11109344394515497, 0.965],
+            [0.12498012443829934, 0.958],
+            [0.14283442792948498, 0.949],
+            [0.16664016591773245, 0.936],
+            [0.19996819910127894, 0.918],
+            [0.24996024887659868, 0.889],
+            [0.3332803318354649, 0.839],
+            [0.49992049775319736, 0.739]
+        ];
+
+        const defenderEmpirical = [
+            [0.01999982051766484, 0.0029],
+            [0.02222208577366333, 0.0036399962214245228],
+            [0.024999144335921195, 0.004206674179814676],
+            [0.02857177143334168, 0.004916666666666666],
+            [0.033276149929042494, 0.006338342098672677],
+            [0.04999791301444194, 0.03143000250438267],
+            [0.05002385067404079, 0.012279986173522295],
+            [0.0666677101594457, 0.01732999415644044],
+            [0.06668268233667474, 0.01861994469408918],
+            [0.08330694780504666, 0.027],
+            [0.09998409955063947, 0.03402004839267197],
+            [0.10000162784873529, 0.03143],
+            [0.11109344394515497, 0.042133502323616394],
+            [0.12498012443829934, 0.05034998271690287],
+            [0.14283442792948498, 0.060942669497802575],
+            [0.16664016591773245, 0.07259995391174098],
+            [0.19996819910127894, 0.09111994469408918],
+            [0.24996024887659868, 0.1244002765295541],
+            [0.3332803318354649, 0.1791323885240235],
+            [0.49992049775319736, 0.3055997234704459]
+        ];
+
+        attackerEmpirical.sort((a,b)=>a[0]-b[0]);
+        defenderEmpirical.sort((a,b)=>a[0]-b[0]);
+
+        function clamp01(x) { 
+            return Math.max(0, Math.min(0.999999, x)); 
+        }
+
+        function interpFromArray(ratio, arr) {
+            if (!arr.length) return 0;
+            
+            for (let i = 0; i < arr.length; i++) {
+                if (Math.abs(arr[i][0] - ratio) < 1e-12) return clamp01(arr[i][1]);
+            }
+            
+            const r = ratio;
+            const rmin = arr[0][0], rmax = arr[arr.length-1][0];
+            
+            if (r >= rmin && r <= rmax) {
+                let i = 0;
+                while (i < arr.length-1 && r > arr[i+1][0]) i++;
+                
+                const x1 = Math.log10(arr[i][0]), x2 = Math.log10(arr[i+1][0]);
+                const y1 = arr[i][1], y2 = arr[i+1][1];
+                if (x2 === x1) return clamp01((y1+y2)/2);
+                const x = Math.log10(r);
+                const t = (x - x1) / (x2 - x1);
+                const y = y1 + t*(y2 - y1);
+                return clamp01(y);
+            } else {
+                if (r < rmin) {
+                    const x1 = Math.log10(arr[0][0]), x2 = Math.log10(arr[1][0]);
+                    const y1 = arr[0][1], y2 = arr[1][1];
+                    const x = Math.log10(r);
+                    const y = y1 + (y2 - y1) * ((x - x1) / (x2 - x1));
+                    return clamp01(y);
+                } else {
+                    const n = arr.length;
+                    const x1 = Math.log10(arr[n-2][0]), x2 = Math.log10(arr[n-1][0]);
+                    const y1 = arr[n-2][1], y2 = arr[n-1][1];
+                    const x = Math.log10(r);
+                    const y = y2 + (y2 - y1) * ((x - x2) / (x2 - x1));
+                    return clamp01(y);
+                }
+            }
+        }
+
         function createUnitInputs(containerId, side) {
             const container = document.getElementById(containerId);
             for (const category in units) {
@@ -335,13 +489,174 @@
             }
         }
 
+        function toggleEmitterMode() {
+            const checkbox = document.getElementById('emitterModeCheckbox');
+            const emitterMode = document.getElementById('emitterMode');
+            
+            if (checkbox.checked) {
+                emitterMode.classList.add('emitter-active');
+            } else {
+                emitterMode.classList.remove('emitter-active');
+            }
+        }
+
         createUnitInputs('attackerUnits', 'attacker');
         createUnitInputs('defenderUnits', 'defender');
+
+        function calculateComposition(unitCounts) {
+            const composition = { infantry: 0, armored: 0, artillery: 0, air: 0 };
+            let total = 0;
+            for (const category in unitCounts) {
+                for (const unitName in unitCounts[category]) {
+                    const { count } = unitCounts[category][unitName];
+                    composition[category] += count;
+                    total += count;
+                }
+            }
+            for (const category in composition) {
+                composition[category] = total > 0 ? composition[category] / total : 0;
+            }
+            return composition;
+        }
+
+        function calculateTotalOffense(unitCounts) {
+            let total = 0;
+            for (const category in unitCounts) {
+                for (const unitName in unitCounts[category]) {
+                    const unit = units[category].find(u => u.name === unitName);
+                    if (!unit) continue;
+                    const { count, bonus } = unitCounts[category][unitName];
+                    const bonusMultiplier = 1 + (bonus / 100);
+                    total += unit.offense * count * bonusMultiplier;
+                }
+            }
+            return total;
+        }
+
+        function calculateTotalDefenseAgainstComposition(defUnits, attackerComposition) {
+            const EMITTER_DEF_BONUS = 1.25;
+            let total = 0;
+            for (const category in defUnits) {
+                for (const unitName in defUnits[category]) {
+                    const unit = units[category].find(u => u.name === unitName);
+                    if (!unit) continue;
+                    const { count, bonus } = defUnits[category][unitName];
+                    const bonusMultiplier = 1 + (bonus / 100);
+                    
+                    let avgDefense = 0;
+                    const categories = ['infantry', 'armored', 'artillery', 'air'];
+                    for (const cat of categories) {
+                        const composition = attackerComposition[cat] || 0;
+                        const defense = unit.defense[cat] || 100;
+                        avgDefense += defense * composition;
+                    }
+                    total += avgDefense * count * bonusMultiplier * EMITTER_DEF_BONUS;
+                }
+            }
+            return total;
+        }
+
+        function buildCasualties(unitCounts, lossFraction) {
+            const casualties = {};
+            for (const category in unitCounts) {
+                casualties[category] = {};
+                for (const unitName in unitCounts[category]) {
+                    const { count } = unitCounts[category][unitName];
+                    const lost = Math.min(count, Math.round(count * lossFraction));
+                    casualties[category][unitName] = { count, lost };
+                }
+            }
+            return casualties;
+        }
+
+        function calculateEmitterBattle(attUnits, defUnits) {
+            const attackerComposition = calculateComposition(attUnits);
+            const attackerPower = calculateTotalOffense(attUnits);
+            const defenderPower = calculateTotalDefenseAgainstComposition(defUnits, attackerComposition);
+
+            if (attackerPower <= 0 && defenderPower <= 0) {
+                return { attackerPower: 0, defenderPower: 0, attackerLossFraction: 0, defenderLossFraction: 0, attackerCasualties: {}, defenderCasualties: {}, ratio: 0 };
+            }
+            if (attackerPower <= 0) {
+                return { attackerPower, defenderPower, attackerLossFraction: 1, defenderLossFraction: 0, attackerCasualties: buildCasualties(attUnits, 1), defenderCasualties: buildCasualties(defUnits, 0), ratio: 0 };
+            }
+            if (defenderPower <= 0) {
+                return { attackerPower, defenderPower, attackerLossFraction: 0, defenderLossFraction: 1, attackerCasualties: buildCasualties(attUnits, 0), defenderCasualties: buildCasualties(defUnits, 1), ratio: Infinity };
+            }
+
+            const ratio = attackerPower / defenderPower;
+            const attLossFrac = interpFromArray(ratio, attackerEmpirical);
+            const defLossFrac = interpFromArray(ratio, defenderEmpirical);
+
+            return {
+                attackerPower, defenderPower,
+                attackerLossFraction: attLossFrac,
+                defenderLossFraction: defLossFrac,
+                attackerCasualties: buildCasualties(attUnits, attLossFrac),
+                defenderCasualties: buildCasualties(defUnits, defLossFrac),
+                ratio
+            };
+        }
 
         function calculateBattle() {
             const attackerUnits = getUnits('attackerUnits');
             const defenderUnits = getUnits('defenderUnits');
+            const isEmitterMode = document.getElementById('emitterModeCheckbox').checked;
 
+            if (isEmitterMode) {
+                calculateEmitterBattleResults(attackerUnits, defenderUnits);
+            } else {
+                calculateNormalBattle(attackerUnits, defenderUnits);
+            }
+        }
+
+        function calculateEmitterBattleResults(attackerUnits, defenderUnits) {
+            const result = calculateEmitterBattle(attackerUnits, defenderUnits);
+            
+            const attackerLossPct = (result.attackerLossFraction * 100).toFixed(4);
+            const defenderLossPct = (result.defenderLossFraction * 100).toFixed(6);
+            const winner = result.attackerLossFraction < result.defenderLossFraction ? "Attacker" : "Defender";
+
+            const results = document.getElementById('results');
+            results.innerHTML = `
+                <h3>Emitter Battle Results</h3>
+                <div class="results-grid">
+                    <div class="result-item">
+                        <p><strong>Attacker Power:<br></strong> ${Math.round(result.attackerPower).toLocaleString()}</p>
+                    </div>
+                    <div class="result-item">
+                        <p><strong>Defender Power (with emitter bonus):<br></strong> ${Math.round(result.defenderPower).toLocaleString()}</p>
+                    </div>
+                    <div class="result-item">
+                        <p><strong>Power Ratio (A:D):<br></strong> ${result.ratio.toFixed(6)}</p>
+                    </div>
+                    <div class="result-item">
+                        <p><strong>Attacker Loss Percentage:<br></strong> ${attackerLossPct}%</p>
+                    </div>
+                    <div class="result-item">
+                        <p><strong>Defender Loss Percentage:<br></strong> ${defenderLossPct}%</p>
+                    </div>
+                    <div class="result-item">
+                        <p><strong>Winner:<br></strong> ${winner}</p>
+                    </div>
+                </div>
+                <div class="casualties">
+                    <h3>Casualties (Emitter Mode):</h3>
+                    <div class="battle-grid">
+                        <div class="casualty-table">
+                            <h4>Attacker Casualties</h4>
+                            ${renderCasualties(result.attackerCasualties)}
+                        </div>
+                        <div class="casualty-table">
+                            <h4>Defender Casualties</h4>
+                            ${renderCasualties(result.defenderCasualties)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculateNormalBattle(attackerUnits, defenderUnits) {
             const attackerOffense = calculateTotalOffense(attackerUnits);
             const defenderDefense = calculateTotalDefense(defenderUnits);
             const attackerComposition = calculateComposition(attackerUnits);
@@ -352,10 +667,10 @@
             }
 
             const totalCombatValue = attackerOffense + totalDefense;
-            const defenderLossPercentage = attackerOffense / totalCombatValue;
-            const attackerLossPercentage = totalDefense / totalCombatValue;
+            const defenderLossPercentage = totalCombatValue > 0 ? attackerOffense / totalCombatValue : 0;
+            const attackerLossPercentage = totalCombatValue > 0 ? totalDefense / totalCombatValue : 0;
 
-			const winner = attackerLossPercentage < defenderLossPercentage ? "Attacker" : "Defender";
+            const winner = attackerLossPercentage < defenderLossPercentage ? "Attacker" : "Defender";
 
             const results = document.getElementById('results');
             results.innerHTML = `
@@ -379,8 +694,16 @@
                 </div>
                 <div class="casualties">
                     <h3>Casualties:</h3>
-                    ${calculateCasualties(attackerUnits, attackerLossPercentage, 'Attacker')}
-                    ${calculateCasualties(defenderUnits, defenderLossPercentage, 'Defender')}
+                    <div class="battle-grid">
+                        <div class="casualty-table">
+                            <h4>Attacker Casualties</h4>
+                            ${calculateCasualties(attackerUnits, attackerLossPercentage, 'Attacker')}
+                        </div>
+                        <div class="casualty-table">
+                            <h4>Defender Casualties</h4>
+                            ${calculateCasualties(defenderUnits, defenderLossPercentage, 'Defender')}
+                        </div>
+                    </div>
                 </div>
             `;
         }
@@ -404,19 +727,6 @@
             return unitCounts;
         }
 
-        function calculateTotalOffense(unitCounts) {
-            let totalOffense = 0;
-            for (const category in unitCounts) {
-                for (const unitName in unitCounts[category]) {
-                    const unit = units[category].find(u => u.name === unitName);
-                    const { count, bonus } = unitCounts[category][unitName];
-                    const bonusMultiplier = 1 + (bonus / 100);
-                    totalOffense += unit.offense * count * bonusMultiplier;
-                }
-            }
-            return totalOffense;
-        }
-
         function calculateTotalDefense(unitCounts) {
             const totalDefense = { infantry: 0, armored: 0, artillery: 0, air: 0 };
             for (const category in unitCounts) {
@@ -432,30 +742,26 @@
             return totalDefense;
         }
 
-        function calculateComposition(unitCounts) {
-            const composition = { infantry: 0, armored: 0, artillery: 0, air: 0 };
-            let total = 0;
-            for (const category in unitCounts) {
-                for (const unitName in unitCounts[category]) {
-                    const { count } = unitCounts[category][unitName];
-                    composition[category] += count;
-                    total += count;
+        function renderCasualties(casualties) {
+            let html = '';
+            for (const category in casualties) {
+                html += `<div class="casualty-category">${category.charAt(0).toUpperCase() + category.slice(1)}</div>`;
+                for (const unitName in casualties[category]) {
+                    const { count, lost } = casualties[category][unitName];
+                    html += `<div class="casualty-item">${unitName}: ${lost} lost out of ${count}</div>`;
                 }
             }
-            for (const category in composition) {
-                composition[category] = composition[category] / total;
-            }
-            return composition;
+            return html;
         }
 
         function calculateCasualties(unitCounts, lossPercentage, side) {
             let casualties = '';
             for (const category in unitCounts) {
-                casualties += `<h5>${category.charAt(0).toUpperCase() + category.slice(1)}</h5>`;
+                casualties += `<div class="casualty-category">${category.charAt(0).toUpperCase() + category.slice(1)}</div>`;
                 for (const unitName in unitCounts[category]) {
                     const { count, bonus } = unitCounts[category][unitName];
                     const lost = Math.round(count * lossPercentage);
-                    casualties += `<p>${side} ― ${unitName}: ${lost} lost out of ${count}</p>`;
+                    casualties += `<div class="casualty-item">${unitName}: ${lost} lost out of ${count}</div>`;
                 }
             }
             return casualties;
@@ -463,23 +769,23 @@
 
         const translations = {
             en: {
-                title: "Total Domination - Battle Calculator 1.0",
+                title: "Total Domination - Battle Calculator 1.1",
                 description: "Calculate battle outcomes for Total Domination.<br>Input unit amount and bonuses for attackers and defenders."
             },
             ru: {
-                title: "Тотальное Превосходство - Калькулятор Сражений 1.0",
+                title: "Тотальное Превосходство - Калькулятор Сражений 1.1",
                 description: "Рассчитайте исходы битв для Тотального Превосходства.<br>Введите количество юнитов и бонусы для атакующих и защищающихся."
             },
             uk: {
-                title: "Тотальне Домінування - Калькулятор Битв 1.0",
+                title: "Тотальне Домінування - Калькулятор Битв 1.1",
                 description: "Розрахуйте результати битв для Тотального Домінування.<br>Введіть кількість юнітів та бонуси для атакуючих та захисників."
             },
             es: {
-                title: "Dominación Total - Calculadora de Batallas 1.0",
+                title: "Dominación Total - Calculadora de Batallas 1.1",
                 description: "Calcula los resultados de las batallas para Dominación Total.<br>Ingresa la cantidad de unidades y bonificaciones para atacantes y defensores."
             },
             de: {
-                title: "Totale Dominanz - Schlachtrechner 1.0",
+                title: "Totale Dominanz - Schlachtrechner 1.1",
                 description: "Berechnen Sie Schlachtergebnisse für Totale Dominanz.<br>Geben Sie Einheitenzahl und Boni für Angreifer und Verteidiger ein."
             }
         };
